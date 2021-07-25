@@ -1,0 +1,50 @@
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    
+    - uses: azure/docker-login@v1
+      with:
+        login-server: containerizedsiteacr.azurecr.io
+        username: ${{ secrets.acr_containerizedsiteacr_username }}
+        password: ${{ secrets.acr_containerizedsiteacr_password }}
+    
+    - name: Build and push image to ACR
+      id: build-image
+      run: |
+        docker build "$GITHUB_WORKSPACE/" -f  "Dockerfile" -t containerizedsiteacr.azurecr.io/containerizedwordpress:${{ github.sha }} --label dockerfile-path=Dockerfile
+        docker push containerizedsiteacr.azurecr.io/containerizedwordpress:${{ github.sha }}
+    
+    - uses: azure/k8s-set-context@v1
+      with:
+         kubeconfig: ${{ secrets.aks_containerizedwordpress_kubeConfig }}
+      id: login
+    
+    - name: Create namespace
+      run: |
+        namespacePresent=`kubectl get namespace | grep containerizedwordpress8d3f | wc -l`
+        if [ $namespacePresent -eq 0 ]
+        then
+            echo `kubectl create namespace containerizedwordpress8d3f`
+        fi
+
+    - uses: azure/k8s-create-secret@v1
+      with:
+        namespace: containerizedwordpress8d3f
+        container-registry-url: containerizedsiteacr.azurecr.io
+        container-registry-username: ${{ secrets.acr_containerizedsiteacr_username }}
+        container-registry-password: ${{ secrets.acr_containerizedsiteacr_password }}
+        secret-name: containerizedockerauth
+       
+    - uses: azure/k8s-deploy@v1.2
+      with:
+        namespace: containerizedwordpress8d3f
+        manifests: |
+          manifests/deployment-1.yml
+          manifests/service-1.yml
+        images: |
+          containerizedsiteacr.azurecr.io/containerizedwordpress:${{ github.sha }}
+        imagepullsecrets: |
+          containerizedockerauth
