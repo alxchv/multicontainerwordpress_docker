@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: alxchvmulticontainerwordpresskub 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alxchvmulticontainerwordpresskub
+  template:
+    metadata:
+      labels:
+        app: alxchvmulticontainerwordpresskub 
+    spec:
+      containers:
+        - name: alxchvmulticontainerwordpresskub 
+          image: containerizedsiteacr.azurecr.io/alxchvmulticontainerwordpresskub
+          ports:
+          - containerPort: 80
