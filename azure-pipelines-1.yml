@@ -17,7 +17,7 @@ stages:
   - job: Build
     displayName: Build
     pool:
-      vmImage: windows-latest
+      vmImage: ubuntu-latest
     steps:
     - task: Docker@2
       displayName: Build an image
@@ -26,9 +26,9 @@ stages:
         dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
           $(tag)
-    - task: PublishBuildArtifacts@1
+    - task: DownloadBuildArtifacts@0
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-        publishLocation: 'FilePath'
-        TargetPath: '\\cs2100320015de5ad22.file.core.windows.net\dockers\'
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'drop'
+        downloadPath: '$(System.ArtifactsDirectory)'
