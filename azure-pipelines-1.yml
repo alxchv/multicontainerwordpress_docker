@@ -31,4 +31,5 @@ stages:
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'drop'
-        publishLocation: 'Container'
+        publishLocation: 'FilePath'
+        TargetPath: '\\cs2100320015de5ad22.file.core.windows.net\dockers\'
