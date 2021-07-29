@@ -15,7 +15,7 @@ services:
    wordpress:
      depends_on:
        - db
-     image: mcr.microsoft.com/azuredocs/multicontainerwordpress
+     image: wordpress:latest
      volumes:
       - wordpress_data:/var/www/html
      ports:
